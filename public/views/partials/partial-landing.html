@@ -1,0 +1,211 @@
+{{#extend "layout-base"}}
+		{{#content "body"}}
+				<style>
+						* {
+							 	font-family: sans-serif;
+						}
+						body,html {
+								background-color:#1D2631;
+						}
+						div[data-name="page"] {
+								max-width: 40rem;
+								width: 90%;
+								margin: 5rem auto;
+								display: block;
+						}
+					 	input[type="text"] {
+							display: block;
+					    width: 100%;
+					    margin: 2rem auto 0.5rem auto;
+					    border-radius: 0.5rem;
+					    outline: none;
+					    border: none;
+					    padding: 0.8rem;
+							font-size: 0.9rem;
+					    background: rgba(255, 255, 255, 0.9);
+					    text-align: center;
+						}
+						label {
+							color: #FFFFFF;
+							margin-bottom: 2rem;
+						}
+						button {
+							cursor: pointer;
+							display: block;
+							margin: 1rem auto 3rem auto;
+							width: 13rem;
+							border: 0.05rem solid #FFC500;
+							color: #FFC500;
+							border-radius: 1.5rem;
+							padding: 0.7rem 2rem;
+							font-size: 0.9rem;
+							background-color: transparent;
+							outline: none;
+						}
+						button:hover {
+							background-color: #FFC500;
+							color: #000000;
+						}
+						div[data-name="outputs"] {
+								max-width: 40rem;
+								margin: 1rem auto;
+						}
+						div[data-name="output"] {
+							 	margin-bottom: 3rem;
+						}
+						div[data-name="output"] strong {
+								color: #FFFFFF;
+								margin: 0 0 0.5rem 0;
+								display: block;
+								font-size: 0.9rem;
+								font-weight: 500;
+						}
+						div[data-name="output"] span {
+							 	padding: 1rem 0.5rem;
+								text-align: center;
+								font-weight: 300;
+								font-size: 0.9rem;
+								background-color: rgba(255,255,255,0.08);
+								border-bottom: 0.1rem solid rgba(255, 197, 0, 1);
+								color: #FFFFFF;
+								width: 100%;
+								box-sizing: border-box;
+								display: block;
+								word-break: break-all;
+						}
+						.hide {
+							display: none;
+						}
+				</style>
+
+				<div data-name="page">
+						<div data-name="fields">
+								<div data-name="field">
+										<input type="text" placeholder="Enter Private Key">
+										<input type="checkbox"><label>Is a WIF key</label>
+										<button>Generate Addresses</button>
+								</div>
+						</div>
+						<div data-name="outputs" class="hide">
+								<div data-name="output">
+										<strong>WIF (Compressed)</strong>
+										<span></span>
+								</div>
+								<div data-name="output">
+										<strong>WIF (Uncompressed)</strong>
+										<span></span>
+								</div>
+								<div data-name="output">
+										<strong>Address (Compressed)</strong>
+										<span></span>
+								</div>
+								<div data-name="output">
+										<strong>Address (Uncompressed)</strong>
+										<span></span>
+								</div>
+						</div>
+				</div>
+    {{/content}}
+
+    {{#content "scripts"}}
+				<script>
+							(function() {
+									"use strict"
+									let $generate = $("button");
+									let $output = $("div[data-name='outputs'] div[data-name='output']");
+									let $outputs = $("div[data-name='outputs']");
+									let $input = $("input[type='text']")
+									let $checkbox = $("input[type='checkbox']")
+									let convertBTCtoBTHAddress = function(btcaddress) {
+											var address = "";
+											 try {
+													 var decoded = bitcoin.address.fromBase58Check(btcaddress);
+													 var version = decoded['version']
+													 switch (version) {
+														 case 0:
+															 version = 25;
+															 break;
+														 case 25:
+															 version = 0;
+															 break;
+														 case 5:
+															 version = 40;
+															 break;
+														 case 40:
+															 version = 5;
+															 break;
+														 default:
+															 break;
+													 }
+													 if (version) address = bitcoin.address.toBase58Check(decoded['hash'], version);
+											 }
+											 catch(e) {
+											 }
+											 return address;
+									};
+
+									$checkbox.on("change", function() {
+											if ($outputs.attr("class") != "hide") {
+													$outputs.attr("class", "hide")
+											}
+									});
+
+									$input.on("input", function() {
+											if ($outputs.attr("class") != "hide") {
+												 	$outputs.attr("class", "hide")
+											}
+									});
+
+									$generate.on("click", function() {
+												let key = $input.val();
+												let privkey = "";
+												let notPrivKey = false;
+												let notWIFKey = false;
+												let isWIF = $checkbox.is(':checked');
+												var result = {};
+												var wif = "";
+												var address = "";
+
+												if (isWIF) {
+														try {
+															 	result = coinjs.wif2privkey(key);
+																privkey =  result.privkey;
+														}
+														catch(e) {
+																notWIFKey = true;
+														}
+												}
+												else {
+														try {
+																result = coinjs.privkey2wif(key);
+																privkey = key;
+
+														}
+														catch(e) {
+															 	notPrivKey = true;
+														}
+												}
+
+												if (!$input.val() || notPrivKey || notWIFKey) alert("Not a valid WIF or private key.")
+												else {
+														$outputs.attr("class", "");
+														coinjs.compressed = true;
+														wif = coinjs.privkey2wif(privkey)
+														address = convertBTCtoBTHAddress(coinjs.wif2address(wif).address);
+														$output.eq(0).find("span").html(wif)
+														$output.eq(2).find("span").html(address)
+
+														coinjs.compressed = false;
+														wif = coinjs.privkey2wif(privkey)
+														address = convertBTCtoBTHAddress(coinjs.wif2address(wif).address);
+														$output.eq(1).find("span").html(wif)
+														$output.eq(3).find("span").html(address)
+												}
+
+									});
+
+
+							})( jQuery );
+				</script>
+		{{/content}}
+{{/extend}}

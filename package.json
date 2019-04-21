@@ -1,0 +1,33 @@
+{
+  "name": "@bithereum/address-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "boom": "^2.9.0",
+    "handlebars-layouts": "^3.1.2",
+    "hapi": "^10.1.0",
+    "handlebars": "^4.0.3",
+    "hoek": "^2.16.3",
+    "inert": "^3.0.2",
+    "joi": "^6.7.1",
+    "path": "^0.12.7",
+    "vision": "^3.0.0",
+    "voice.js": "^0.1.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BTHPOS/address-tool.git"
+  },
+  "author": "Dondrey Taylor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BTHPOS/address-tool/issues"
+  },
+  "homepage": "https://github.com/BTHPOS/address-tool#readme"
+}
